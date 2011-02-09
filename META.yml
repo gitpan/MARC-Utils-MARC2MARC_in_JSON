@@ -1,16 +1,18 @@
 --- #YAML:1.0
 name:               MARC-Utils-MARC2MARC_in_JSON
-version:            0.01
+version:            0.02
 abstract:           Perl module that provides routines to
 author:
-    - Brad Baxter <bmb@galib.uga.edu>
+    - Brad Baxter <bbaxter@cpan.org>
 license:            unknown
 distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
 build_requires:
     ExtUtils::MakeMaker:  0
-requires:  {}
+requires:
+    MARC::Record:  0
+    Test::More:    0
 no_index:
     directory:
         - t

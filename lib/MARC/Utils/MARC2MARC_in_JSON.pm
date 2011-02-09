@@ -1,10 +1,11 @@
+#---------------------------------------------------------------------
 package MARC::Utils::MARC2MARC_in_JSON;
 
-use 5.008008;
+use 5.008002;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 our (@ISA, @EXPORT_OK);
 BEGIN {
@@ -15,6 +16,7 @@ BEGIN {
 
 use MARC::Record;
 
+#---------------------------------------------------------------------
 sub marc2marc_in_json {
     my( $marc_record ) = @_;
 
@@ -50,6 +52,7 @@ sub marc2marc_in_json {
     \%marc_in_json;  # returned
 }
 
+#---------------------------------------------------------------------
 sub marc_in_json2marc {
     my( $marc_in_json ) = @_;
 
@@ -120,14 +123,14 @@ JSON
 
 =head1 AUTHOR
 
-Brad Baxter, E<lt>bmb@galib.uga.eduE<gt>
+Brad Baxter, E<lt>bbaxter@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2011 by Brad Baxter
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
+it under the same terms as Perl itself, either Perl version 5.8.2 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut

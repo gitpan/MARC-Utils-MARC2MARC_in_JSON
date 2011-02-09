@@ -1,4 +1,5 @@
-use Data::Dumper;
+#---------------------------------------------------------------------
+# MARC-Utils-MARC2MARC_in_JSON.t
 
 use Test::More tests => 3;
 BEGIN {
@@ -6,7 +7,7 @@ BEGIN {
         qw( marc2marc_in_json marc_in_json2marc ) );
 }
 
-# loaded below ...
+# loaded in BEGIN blocks below ...
 my $marc_in_json;
 my $marc_as_formatted;
 
@@ -17,8 +18,9 @@ is( $marc_record->as_formatted(), $marc_as_formatted, "marc_record->as_formatted
 $marc_in_json = marc2marc_in_json( $marc_record );
 
 $marc_record = marc_in_json2marc( $marc_in_json );
-is( $marc_record->as_formatted(), $marc_as_formatted, "marc_record->as_formatted" );
+is( $marc_record->as_formatted(), $marc_as_formatted, "marc_record->as_formatted (round-trip)" );
 
+#---------------------------------------------------------------------
 BEGIN {
     $marc_in_json =
     {
