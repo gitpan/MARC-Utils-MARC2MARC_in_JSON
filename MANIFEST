@@ -1,0 +1,7 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/MARC-Utils-MARC2MARC_in_JSON.t
+lib/MARC/Utils/MARC2MARC_in_JSON.pm
+META.yml                                 Module meta-data (added by MakeMaker)

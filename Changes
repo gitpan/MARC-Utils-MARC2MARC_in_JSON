@@ -1,0 +1,6 @@
+Revision history for Perl extension MARC::Utils::MARC2MARC_in_JSON.
+
+0.01  Tue Feb  8 14:48:17 2011
+    - original version; created by h2xs 1.23 with options
+        -AX --skip-exporter --use-new-tests -n MARC::Utils::MARC2MARC_in_JSON
+
