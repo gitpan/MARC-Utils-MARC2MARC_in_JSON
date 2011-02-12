@@ -14,8 +14,14 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-    MARC::Record
-    Test::More
+    Module:
+        MARC::Record
+        Carp
+
+    Testing:
+        File::Spec
+        Test::More
+        JSON
 
 COPYRIGHT AND LICENCE
 

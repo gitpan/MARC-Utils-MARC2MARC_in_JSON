@@ -1,10 +1,14 @@
 #---------------------------------------------------------------------
 # MARC-Utils-MARC2MARC_in_JSON.t
 
-use Test::More tests => 3;
+use strict;
+use warnings;
+use File::Spec;
+use Test::More tests => 7;
+
 BEGIN {
     use_ok('MARC::Utils::MARC2MARC_in_JSON',
-        qw( marc2marc_in_json marc_in_json2marc ) );
+        qw( marc2marc_in_json marc_in_json2marc each_record ) );
 }
 
 # loaded in BEGIN blocks below ...
@@ -19,6 +23,44 @@ $marc_in_json = marc2marc_in_json( $marc_record );
 
 $marc_record = marc_in_json2marc( $marc_in_json );
 is( $marc_record->as_formatted(), $marc_as_formatted, "marc_record->as_formatted (round-trip)" );
+
+# get_next
+
+my $expected = <<'_end_';
+Current population reports.
+Current population reports.
+Physical review.
+Physical review.
+America and the British Labour Party :
+_end_
+
+for( qw( collection collection-delimited delimited delimited2 ) ) {
+    my $filename = File::Spec->catfile( 't', "title_proper.json-$_" );
+    is( get_titles( $filename ), $expected, "each_record, $_" );
+}
+
+sub get_titles {
+    my( $filename ) = @_;
+
+    my @titles;
+
+    my $get_next = each_record( $filename );
+
+    while( my $record = $get_next->() ) {
+        for my $field ( @{$record->{'fields'}} ) {
+            my ( $tag, $data ) = %$field;
+            next unless $tag eq '245';
+            for my $subfield( @{$data->{'subfields'}} ) {
+                my ( $tag, $data ) = %$subfield;
+                next unless $tag eq 'a';
+                push @titles, "$data\n";
+                last;
+            }
+            last;
+        }
+    }
+    join '' => @titles;  # returned
+}
 
 #---------------------------------------------------------------------
 BEGIN {

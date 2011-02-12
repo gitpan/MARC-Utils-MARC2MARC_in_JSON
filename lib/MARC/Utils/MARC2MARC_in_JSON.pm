@@ -4,17 +4,19 @@ package MARC::Utils::MARC2MARC_in_JSON;
 use 5.008002;
 use strict;
 use warnings;
+use Carp;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our (@ISA, @EXPORT_OK);
 BEGIN {
     require Exporter;
     @ISA = qw(Exporter);
-    @EXPORT_OK = qw( marc2marc_in_json marc_in_json2marc );
+    @EXPORT_OK = qw( marc2marc_in_json marc_in_json2marc each_record );
 }
 
 use MARC::Record;
+use JSON;
 
 #---------------------------------------------------------------------
 sub marc2marc_in_json {
@@ -84,6 +86,75 @@ sub marc_in_json2marc {
     $marc_record;  #returned
 }
 
+#---------------------------------------------------------------------
+sub each_record {
+    my( $filename ) = @_;
+    
+    open my $fh, '<', $filename or croak "Can't open $filename: $!";
+
+    # examine beginning of file to determine its type
+
+    my $first_line = <$fh>;
+    my( $filetype, $recsep );
+
+    for( $first_line ) {
+        if( /^\[/ ) {
+            $filetype = 'collection';
+            if( /^\[\n$/ ) {
+                my $second_line = <$fh>;
+                if( $second_line eq "\n" ) {
+                    $filetype = 'collection-delimited';
+                    $recsep = "\n\n";
+                }
+            }
+        }
+        elsif( /^{/ )  #vi}
+        {
+            $filetype = 'object';
+        }
+        else {
+            $filetype = 'delimited';
+            $recsep = "\n$_";
+        }
+    }
+
+    if( $filetype =~ /^object|collection$/ ) {
+
+        seek $fh, 0, 0;  # rewind to top
+        local $/;
+
+        my $json_items = decode_json <$fh>;  # slurp
+        $json_items = [$json_items] if $filetype eq 'object';
+        my $index = 0;
+
+        # "get_next" closure
+        return sub {
+            return if $index > $#$json_items;
+            return $json_items->[ $index ++ ];
+        };
+
+    }
+
+    elsif( $filetype =~ /delimited$/ ) {
+
+        # "get_next" closure
+        return sub {
+            local $/ = $recsep;
+            my $text = <$fh>;
+            return unless defined $text;
+            return unless $text =~ /^\s*{/;
+            chomp $text;
+            $text =~ s/,\s*$//;
+            return decode_json $text;
+        };
+
+    }
+
+    else {
+        croak "Unrecognized file type: $filename";
+    }
+
+}
 1;
 
 __END__
@@ -95,10 +166,15 @@ convert from a MARC::Record object to a MARC-in-JSON hash structure.
 
 =head1 SYNOPSIS
 
-    use MARC::Utils::MARC2MARC_in_JSON qw( marc2marc_in_json marc_in_json2marc );
+    use MARC::Utils::MARC2MARC_in_JSON qw( marc2marc_in_json marc_in_json2marc each_record);
 
     $marc_in_json = marc2marc_in_json( $marc_record );
     $marc_record  = marc_in_json2marc( $marc_in_json );
+
+    my $get_next = each_record( "marc.json" );
+    while( my $record = $get_next->() ) {
+        print get_title( $record );  # you write get_title()
+    }
 
 =head1 DESCRIPTION
 
@@ -115,6 +191,12 @@ text (in MARC-in-JSON format) to perl.
 
 If you indeed want JSON, then you can simply use the JSON module to
 convert the hash.
+
+The each_record() subroutine returns a closure that itself returns
+a MARC_in_JSON structure each time it's called.  It is designed to
+be a proof-of-concept for my JSON Document Streaming proposal:
+
+http://en.wikipedia.org/wiki/User:Baxter.brad/Drafts/JSON_Document_Streaming_Proposal
 
 =head1 SEE ALSO
 

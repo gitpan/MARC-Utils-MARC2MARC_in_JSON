@@ -8,6 +8,8 @@ WriteMakefile(
     PREREQ_PM         => {
         'MARC::Record' => 0,
         'Test::More'   => 0,
+        'Carp'         => 0,
+        'JSON'         => 2,
     }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/MARC/Utils/MARC2MARC_in_JSON.pm', # retrieve abstract from module

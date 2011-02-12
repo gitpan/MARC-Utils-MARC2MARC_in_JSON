@@ -1,5 +1,9 @@
 Revision history for Perl extension MARC::Utils::MARC2MARC_in_JSON.
 
+0.03 Sat Feb 12 14:44:17 EST 2011
+    - add each_record for reading json files, with tests
+    - RFC: http://en.wikipedia.org/wiki/User:Baxter.brad/Drafts/JSON_Document_Streaming_Proposal
+
 0.02 Wed Feb  9 08:06:07 EST 2011
     - add prerequisites
     - set perl version to 5.8.2
