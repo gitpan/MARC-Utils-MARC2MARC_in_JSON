@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 use File::Spec;
-use Test::More tests => 7;
+use Test::More tests => 13;
 
 BEGIN {
     use_ok('MARC::Utils::MARC2MARC_in_JSON',
@@ -39,12 +39,29 @@ for( qw( collection collection-delimited delimited delimited2 ) ) {
     is( get_titles( $filename ), $expected, "each_record, $_" );
 }
 
+for( qw( ndj collection collection-delimited delimited delimited2 ) ) {
+    my $filetype = $_;
+       $filetype =~ s/2$//;
+    my $filename = File::Spec->catfile( 't', "title_proper.json-$_" );
+    is( get_titles( $filename, $filetype ), $expected, "each_record, $_" );
+}
+
+$expected = <<'_end_';
+Current population reports.
+_end_
+
+
+for( qw( object ) ) {
+    my $filename = File::Spec->catfile( 't', "title_proper.json-$_" );
+    is( get_titles( $filename ), $expected, "each_record, $_" );
+}
+
 sub get_titles {
-    my( $filename ) = @_;
+    my( $filename, $filetype ) = @_;
 
     my @titles;
 
-    my $get_next = each_record( $filename );
+    my $get_next = each_record( $filename, $filetype );
 
     while( my $record = $get_next->() ) {
         for my $field ( @{$record->{'fields'}} ) {

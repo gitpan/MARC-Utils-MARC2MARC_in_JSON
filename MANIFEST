@@ -3,6 +3,8 @@ Makefile.PL
 MANIFEST
 README
 t/MARC-Utils-MARC2MARC_in_JSON.t
+t/title_proper.json-ndj
+t/title_proper.json-object
 t/title_proper.json-collection
 t/title_proper.json-collection-delimited
 t/title_proper.json-delimited

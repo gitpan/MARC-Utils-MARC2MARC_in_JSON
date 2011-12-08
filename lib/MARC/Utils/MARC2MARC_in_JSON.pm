@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.03';
+our $VERSION = '0.05';
 
 our (@ISA, @EXPORT_OK);
 BEGIN {
@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use MARC::Record;
-use JSON;
+use JSON;  # decode_json()
 
 #---------------------------------------------------------------------
 sub marc2marc_in_json {
@@ -88,7 +88,7 @@ sub marc_in_json2marc {
 
 #---------------------------------------------------------------------
 sub each_record {
-    my( $filename ) = @_;
+    my( $filename, $declared_filetype ) = @_;
     
     open my $fh, '<', $filename or croak "Can't open $filename: $!";
 
@@ -110,7 +110,14 @@ sub each_record {
         }
         elsif( /^{/ )  #vi}
         {
-            $filetype = 'object';
+            if( $declared_filetype and
+                $declared_filetype eq 'ndj' ) {  # newline delimited json
+                $filetype = $declared_filetype;
+                $recsep   = "\n";
+            }
+            else {
+                $filetype = 'object';
+            }
         }
         else {
             $filetype = 'delimited';
@@ -118,12 +125,15 @@ sub each_record {
         }
     }
 
+    croak "File doesn't match file type: $filename, $declared_filetype vs. $filetype"
+        if $declared_filetype and $declared_filetype ne $filetype;
+
     if( $filetype =~ /^object|collection$/ ) {
 
         seek $fh, 0, 0;  # rewind to top
         local $/;
 
-        my $json_items = decode_json <$fh>;  # slurp
+        my $json_items = decode_json( <$fh> );  # slurp
         $json_items = [$json_items] if $filetype eq 'object';
         my $index = 0;
 
@@ -150,11 +160,29 @@ sub each_record {
 
     }
 
+    elsif( $filetype eq 'ndj' ) {
+
+        seek $fh, 0, 0;  # rewind to top
+
+        # "get_next" closure
+        return sub {
+            local $/ = $recsep;
+            my $text = <$fh>;
+            return unless defined $text;
+            return unless $text =~ /^\s*{/;
+            chomp $text;
+            $text =~ s/,\s*$//;  # just in case
+            return decode_json $text;
+        };
+
+    }
+
     else {
         croak "Unrecognized file type: $filename";
     }
 
 }
+
 1;
 
 __END__
